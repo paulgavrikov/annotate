@@ -341,9 +341,10 @@ if __name__ == "__main__":
                     "choice": "no" if photo.choice() == "yes" else "yes"
                 })
         
-    output_file = f"{session_id}_annotate.csv"
+    if len(rows) > 0:
+        output_file = f"{session_id}_annotate.csv"
 
-    sys.stdout.write(f"Writing out {len(rows)} rows to {output_file} ...")
+        sys.stdout.write(f"Writing out {len(rows)} rows to {output_file} ...")
 
-    df = pd.DataFrame(rows)
-    df.to_csv(output_file, index=False)
+        df = pd.DataFrame(rows)
+        df.to_csv(output_file, index=False)
