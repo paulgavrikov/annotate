@@ -17,6 +17,7 @@ import matplotlib.image as mpimg
 from tabulate import tabulate
 import datetime
 import pandas as pd
+from model import GeminiModel
 
 
 class Photo:
@@ -219,16 +220,25 @@ class ImageTable:
             if photo.filename() not in self._photos:
                 self._photos[photo.filename()] = photo
 
-    def annotate(self, figsize):
+    def annotate(self, figsize, gemini_model_name=None):
 
         n_photos = len(self._photos)
         keys = list(self._photos.keys())
+
+        gemini = None
+        if gemini_model_name != None:
+            gemini = GeminiModel(gemini_model_name)
         
         np.random.shuffle(keys)
         for j in range(0, n_photos):
             filename = keys[j]
-            title = "Round %d / %d\n%s\n%s" % (
-                j + 1, n_photos, filename.split("/")[-1], self._question)
+
+            gemini_reponse = ""
+            if gemini:
+                gemini_reponse = "Gemini: " + str(gemini.forward(self._question, filename)["response"])
+
+            title = "Round %d / %d\n%s\n%s\n%s" % (
+                j + 1, n_photos, filename.split("/")[-1], self._question, gemini_reponse)
             
             img = self._photos[filename]
             d = Display(img, title, figsize)
@@ -290,6 +300,16 @@ if __name__ == "__main__":
         default = [20, 10],
         help = "Specifies width and height of the Matplotlib figsize (20, 10)"
     )
+    parser.add_argument(
+        "--gemini-assistant",
+        action = "store_true",
+    )
+    parser.add_argument(
+        "--gemini-model",
+        type = str,
+        default = "gemini-2.0-flash-exp",
+        help = "The Gemini model to use for the assistant"
+    )
     
     args = parser.parse_args()
     assert os.path.isdir(args.photo_dir)
@@ -319,7 +339,7 @@ if __name__ == "__main__":
 
     #--------------------------------------------------------------------------
     # Rank the photos!
-    table.annotate(args.figsize)
+    table.annotate(args.figsize, args.gemini_model if args.gemini_assistant else None)
 
     #--------------------------------------------------------------------------
     # save the table
