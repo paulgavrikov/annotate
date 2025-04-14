@@ -167,7 +167,7 @@ class Display(object):
         self._attach_callbacks()
 
         if title:
-            fig.suptitle(title, fontsize=20)
+            fig.suptitle(title, fontsize=14)
 
         position_figure(fig)
         plt.show()
@@ -226,9 +226,10 @@ class ImageTable:
         
         np.random.shuffle(keys)
         for j in range(0, n_photos):
-            title = "Round %d / %d\n%s" % (
-                j + 1, n_photos, self._question)
             filename = keys[j]
+            title = "Round %d / %d\n%s\n%s" % (
+                j + 1, n_photos, filename.split("/")[-1], self._question)
+            
             img = self._photos[filename]
             d = Display(img, title, figsize)
             if d._choice == Display.LEFT:
